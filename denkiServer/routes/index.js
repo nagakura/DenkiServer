@@ -5,6 +5,7 @@
 
 exports.index = function(req, res){
 	console.log(req.query);
+  res.header("Access-Control-Allow-Origin", "*");
 	/**** read query ****/
 
 	var lat = ""; //緯度
@@ -60,7 +61,22 @@ exports.index = function(req, res){
 		},
 
     function third(callback){
+      hostURL = "api.gnavi.co.jp";
+      mapURL = "/ver1/RestSearchAPI/?keyid=d25ce8e3607bc762db3af9d6232cc1eb&name=";
       res.json(mapJson);
+      /*
+			http.get({
+			  host: hostURL,
+				path: mapURL,
+			}, function(res) {
+				res.on('data', function(data) {
+	        body += data;
+				});
+				res.on('end', function(){
+					mapJson = JSON.parse(body);
+				});
+			});
+      */
       callback(null);
     }
 

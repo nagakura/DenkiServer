@@ -27,6 +27,11 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+app.options('/', function(req, res){
+  res.header("Access-Control-Allow-Origin", "*");
+  res.end('');
+});
+
 app.get('/', routes.index);
 app.get('/users', user.list);
 
