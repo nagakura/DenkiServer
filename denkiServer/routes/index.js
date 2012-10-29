@@ -42,20 +42,21 @@ exports.index = function(req, res){
 	        body += data;
 				});
 				res.on('end', function(){
-					callback(null);
+					mapJson = JSON.parse(body);
+          callback(null);
 				});
 			});
 		},
 	
 		function second(callback){
-			mapJson = body;
-			console.log(mapJson);
+			console.log(mapJson.results);
 			callback(null);
 		}
 
 	]);
 	
-	
+
+
 	//response.json();
 	res.render('index', { title: 'Express' });
 };
