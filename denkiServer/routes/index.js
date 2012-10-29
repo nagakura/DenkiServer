@@ -31,33 +31,31 @@ exports.index = function(req, res){
 	var async = require("async");
 	var http = require('http');
 	var mapJson;
-	http.get({
-	    host: hostURL,
-	    path: mapURL,
-	}, function(res) {
-	    var body = ""
-	    res.on('data', function(data) {
+	var body = "";
+	async.waterfall([
+		function first(callback){
+			http.get({
+			  host: hostURL,
+				path: mapURL,
+			}, function(res) {
+				res.on('data', function(data) {
 	        body += data;
-	    });
-			async.waterfall([
-				function first(callback){
-					res.on('end', function(){
-						console.log("first");
-					});
-						setTimeout(function(){
-							callback(null, "1st");
-						}, 1000);
-				},
-				
-				function second(callback){
-					console.log("second");
-					mapJson = body;
-					return callback;	
-				}
-			]);
-	});	
+				});
+				res.on('end', function(){
+					callback(null);
+				});
+			});
+		},
 	
-	console.log(mapJson);
+		function second(callback){
+			mapJson = body;
+			console.log(mapJson);
+			callback(null);
+		}
+
+	]);
+	
+	
 	//response.json();
 	res.render('index', { title: 'Express' });
 };
