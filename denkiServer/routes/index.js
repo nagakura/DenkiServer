@@ -30,7 +30,8 @@ exports.index = function(req, res){
 	
 	var async = require("async");
 	var http = require('http');
-	var mapJson;
+  var mapJson;  //mapの元Json
+  var shops = [];
 	var body = "";
 	async.waterfall([
 		function first(callback){
@@ -49,14 +50,36 @@ exports.index = function(req, res){
 		},
 	
 		function second(callback){
-			console.log(mapJson.results);
+			console.log("mapJson status: " + mapJson.status);
+      for(var i=0; i<mapJson.results.length; i++){
+        //console.log(mapJson.results[i].title);
+        shops[i] = mapJson.results[i].title;
+        console.log(mapJson.results[i]);
+      }
 			callback(null);
-		}
+		},
+
+    function third(callback){
+      res.json(mapJson);
+      callback(null);
+    }
 
 	]);
 	
+  /*** function ***/
+
+function makeJSON(hash){
+  var init = true;
+  var str = '{';
+  for(var i in hash){
+    if(!init) str += ',';
+    str += '"' + i.replace('"', '\\"', 'g') + '":"';
+    str += hash[i].replace('"', '\\"', 'g') + '"';
+    init = false;
+  }
+  str += '}';
+  return str;
+}
 
 
-	//response.json();
-	res.render('index', { title: 'Express' });
 };
