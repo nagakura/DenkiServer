@@ -32,6 +32,8 @@ exports.index = function(req, res){
 	var async = require("async");
 	var http = require('http');
   var mapJson;  //mapの元Json
+  var other = [];
+  var shopJson;
   var shops = [];
 	var body = "";
 	async.waterfall([
@@ -51,20 +53,25 @@ exports.index = function(req, res){
 		},
 	
 		function second(callback){
+      body = "";
 			console.log("mapJson status: " + mapJson.status);
       for(var i=0; i<mapJson.results.length; i++){
         //console.log(mapJson.results[i].title);
         shops[i] = mapJson.results[i].title;
-        console.log(mapJson.results[i]);
+        other[i] = mapJson.results[i].other;
+        //console.log(mapJson.results[i]);
       }
 			callback(null);
 		},
 
     function third(callback){
-      hostURL = "api.gnavi.co.jp";
-      mapURL = "/ver1/RestSearchAPI/?keyid=d25ce8e3607bc762db3af9d6232cc1eb&name=";
+      var shopname;
+      body = "";
+      shopname = shops[1];
       res.json(mapJson);
-      /*
+      hostURL = "api.gnavi.co.jp";
+      mapURL = "/ver1/RestSearchAPI/?keyid=d25ce8e3607bc762db3af9d6232cc1eb&sort=1&name=" + shopname;
+
 			http.get({
 			  host: hostURL,
 				path: mapURL,
@@ -73,10 +80,32 @@ exports.index = function(req, res){
 	        body += data;
 				});
 				res.on('end', function(){
-					mapJson = JSON.parse(body);
+					 //shopJson = JSON.parse(body);
+           //console.log(body);
+				});
+      });
+
+      callback(null);
+    },
+
+    function fourth(callback){
+      hostURL = "ap.mextractr.net";
+      mapURL = "/ma8/negaposi_analyzer?out=atom&apikey=7A752236663F32CC8BE05D26F74CFDB1C28B1D10&text=" + "hoge";
+
+      
+			http.get({
+			  host: hostURL,
+				path: mapURL,
+			}, function(res) {
+				res.on('data', function(data) {
+	        body += data;
+				});
+				res.on('end', function(){
+					 //shopJson = JSON.parse(body);
+           console.log(body);
 				});
 			});
-      */
+      
       callback(null);
     }
 
@@ -84,18 +113,18 @@ exports.index = function(req, res){
 	
   /*** function ***/
 
-function makeJSON(hash){
-  var init = true;
-  var str = '{';
-  for(var i in hash){
-    if(!init) str += ',';
-    str += '"' + i.replace('"', '\\"', 'g') + '":"';
-    str += hash[i].replace('"', '\\"', 'g') + '"';
-    init = false;
+  function makeJSON(hash){
+    var init = true;
+    var str = '{';
+    for(var i in hash){
+      if(!init) str += ',';
+      str += '"' + i.replace('"', '\\"', 'g') + '":"';
+      str += hash[i].replace('"', '\\"', 'g') + '"';
+      init = false;
+    }
+    str += '}';
+    return str;
   }
-  str += '}';
-  return str;
-}
 
 
 };
