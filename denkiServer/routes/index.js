@@ -84,14 +84,20 @@ exports.index = function(req, res){
            //console.log(body);
 				});
       });
-
+      /*
+      for(var i=0; i<other.length; i++){
+        other[i] = encodeURIComponent(other[i]);
+      }
+      */
       callback(null);
     },
 
     function fourth(callback){
+      /*
+      //for(var i=0; i<other.length; i++){
+      body = "";
       hostURL = "ap.mextractr.net";
-      mapURL = "/ma8/negaposi_analyzer?out=atom&apikey=7A752236663F32CC8BE05D26F74CFDB1C28B1D10&text=" + "hoge";
-
+      mapURL = "/ma8/negaposi_analyzer?out=atom&apikey=7A752236663F32CC8BE05D26F74CFDB1C28B1D10&text=" + encodeURIComponent(other[1]);
       
 			http.get({
 			  host: hostURL,
@@ -101,12 +107,18 @@ exports.index = function(req, res){
 	        body += data;
 				});
 				res.on('end', function(){
-					 //shopJson = JSON.parse(body);
+					 
+           shopJson = JSON.parse(body);
+           console.log("negaposi: " + shopJson.negaposi);
+           console.log(shopJson);
+           
            console.log(body);
 				});
 			});
-      
+      */
       callback(null);
+      //}
+      //console.log(other[0]);
     }
 
 	]);
@@ -126,5 +138,23 @@ exports.index = function(req, res){
     return str;
   }
 
+  function tag_tikan(data)
+{
+  var str = "";
+  str = data;
+  var delete01 = new RegExp(/\n/g);
+  var delete02 = str.replace(delete01, "");
+  var delete03 = new RegExp(/>(.*?)</g);
+  var delete04 = delete02.replace(delete03, ">\n$1\n<");
+  var rgexp = new RegExp(/<("[^"]*"|'[^']*'|[^'">])*>/g);
+  var hoge01 = delete04.replace(rgexp, "");
+  for (var i = 0, j = hoge01.length; i < j; i++) {
+  // 前後の空白文字を取り除く
+  // 連続する半角スペースを１つにまとめる
+  hoge01[i] = hoge01[i].replace(/^\s+|\s+$/g,'').replace(/ +/g,' ');
+  hoge01[i] = hoge01[i].replace(/^\s+|\s+$/g,'').replace(/ +/g,'/\n');
+  }
+  return hoge01;
+}
 
 };
