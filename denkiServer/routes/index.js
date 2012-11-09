@@ -2,7 +2,6 @@
 /*
  * GET home page.
  */
-
 exports.index = function(req, res){
 	console.log(req.query);
   res.header("Access-Control-Allow-Origin", "*");
@@ -33,6 +32,7 @@ exports.index = function(req, res){
 	var http = require('http');
   var mapJson;  //mapの元Json
   var other = [];
+  var gnaviJson;
   var shopJson;
   var shops = [];
 	var body = "";
@@ -80,15 +80,10 @@ exports.index = function(req, res){
 	        body += data;
 				});
 				res.on('end', function(){
-					 //shopJson = JSON.parse(body);
-           //console.log(body);
+          //gnaviJson = XMLToJSON(body);
+           console.log(body);
 				});
       });
-      /*
-      for(var i=0; i<other.length; i++){
-        other[i] = encodeURIComponent(other[i]);
-      }
-      */
       callback(null);
     },
 
@@ -157,4 +152,140 @@ exports.index = function(req, res){
   return hoge01;
 }
 
+
+// Changes XML to JSON
+function xmlToJson(xml) {
+  
+  // Create the return object
+  var obj = {};
+
+  if (xml.nodeType == 1) { // element
+    // do attributes
+    if (xml.attributes.length > 0) {
+    obj["@attributes"] = {};
+      for (var j = 0; j < xml.attributes.length; j++) {
+        var attribute = xml.attributes.item(j);
+        obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+      }
+    }
+  } else if (xml.nodeType == 3) { // text
+    obj = xml.nodeValue;
+  }
+
+  // do children
+  if (xml.hasChildNodes()) {
+    for(var i = 0; i < xml.childNodes.length; i++) {
+      var item = xml.childNodes.item(i);
+      var nodeName = item.nodeName;
+      if (typeof(obj[nodeName]) == "undefined") {
+        obj[nodeName] = xmlToJson(item);
+      } else {
+        if (typeof(obj[nodeName].length) == "undefined") {
+          var old = obj[nodeName];
+          obj[nodeName] = [];
+          obj[nodeName].push(old);
+        }
+        obj[nodeName].push(xmlToJson(item));
+      }
+    }
+  }
+  return obj;
+};
+
+function XMLToJSON(ajax)
+{
+  if (window.ActiveXObject)
+  {
+    var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+    xmlDoc.async = false;
+    xmlDoc.loadXML(ajax.responseText);
+  }
+  else if (window.DOMParser)
+  {
+    var xmlDoc = new DOMParser().parseFromString(
+      ajax.responseText,
+      "application/xml"
+      );
+  }
+  else
+  {
+    return;
+  }
+  var loopParse = function(obj)
+  {
+    var res = {}, cacheTag = {};
+    var ob = {}, att = obj.attributes;
+    if (att != null && att.length != 0)
+    {
+      for (var a = 0, lenA = att.length; a < lenA; a++)
+      {
+        ob[att[a].nodeName.toLowerCase()] = att[a].nodeValue;
+      }
+      res._attr = ob;
+    }
+    
+    if (obj.childNodes.length > 0)
+    {
+      for (var i = 0, len = obj.childNodes.length; i < len; i++)
+      {
+        var ch = obj.childNodes[i];
+        if (ch.nodeType == 3)
+        {
+          if (ch.nodeValue.replace(/[\s|\t|\n]/g, "") == "" ||
+              ch.nodeValue == null) continue;
+          else return ch.nodeValue;
+        }
+        else if (ch.nodeType == 1)
+        {
+          (ch.tagName in cacheTag) ?
+            cacheTag[ch.tagName].push(arguments.callee(ch)) :
+            cacheTag[ch.tagName] = [arguments.callee(ch)];
+        }
+      }
+    }
+    else
+    {
+      return "";
+    }
+    for (var p in cacheTag)
+    {
+      (cacheTag[p].constructor == Array && cacheTag[p].length == 1) ?
+        res[p] = cacheTag[p][0] : res[p] = cacheTag[p];
+    }
+    return res;
+  }
+  return loopParse(xmlDoc);
+}
+
+// Convert a string to XML Node Structure
+// Returns null on failure
+function textToXML ( text ) {
+      try {
+        var xml = null;
+
+        if ( window.DOMParser ) {
+
+          var parser = new DOMParser();
+          xml = parser.parseFromString( text, "text/xml" );
+
+          var found = xml.getElementsByTagName( "parsererror" );
+
+          if ( !found || !found.length || !found[ 0 ].childNodes.length ) {
+            return xml;
+          }
+
+          return null;
+        } else {
+
+          xml = new ActiveXObject( "Microsoft.XMLDOM" );
+
+          xml.async = false;
+          xml.loadXML( text );
+
+          return xml;
+        }
+      } catch ( e ) {
+        // suppress
+      }
+    }
 };
